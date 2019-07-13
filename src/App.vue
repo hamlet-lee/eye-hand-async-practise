@@ -1,8 +1,9 @@
 <template>
   <div id="app">
+    <h1>手眼异步训练</h1>
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">训练</router-link> |
+      <router-link to="/about">关于</router-link>
     </div>
     <router-view/>
   </div>
