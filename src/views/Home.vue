@@ -24,6 +24,11 @@
             x
           </span>
         </template>
+        <template v-else-if="playingSecNo + coveredSecNum + 1 == secIdx">
+          <span class="note looking-ahead" v-for="note in sec">
+            {{note.finger}}
+          </span>
+        </template>
         <template v-else>
           <span class="note" v-for="note in sec">
             {{note.finger}}
@@ -60,11 +65,11 @@ export default {
   },
   data: function() {
     return {
-      spm: 60,           // 每分钟多少小节
+      spm: 30,           // 每分钟多少小节
       sections: [],      // “乐谱”
       playingSecNo: -1,  // 当前在演奏第几个小节
       state: st.BEFORE_START, // 当前状态
-      coveredSecNum: 0,  // 要求提前看几个小节？
+      coveredSecNum: 1,  // 要求提前看几个小节？
       posInPlayingSec: 0, // 当前在演奏第几个音符
       correctNum: 0       // 本局演奏正确的音符数
     }
@@ -101,8 +106,8 @@ export default {
   },
   methods: {
     onStart() {
-      let sectionNum = 10
-      let notesInSection = 4
+      let sectionNum = 40
+      let notesInSection = 2
       let fingerCount = 4
       this.createSections({sectionNum, notesInSection, fingerCount})
       this.playingSecNo = -1 - this.coveredSecNum
@@ -175,5 +180,11 @@ export default {
   }
   .fail{
     color: red;
+  }
+  .home{
+    text-align: left;
+  }
+  .looking-ahead {
+    color: blue;
   }
 </style>
