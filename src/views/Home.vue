@@ -1,24 +1,34 @@
 <template>
   <div class="home">
-    <button v-if="state === BEFORE_START" @click="onStart">开始</button>
+    <div v-if="state === BEFORE_START">
+      每分钟<input v-model="spm"></input>小节
+      <button @click="onStart">开始</button>
+    </div>
     <div v-if="isRunning">
       <span v-for="(sec,secIdx) in sections">
-        <span v-if="playingSecNo == secIdx">
-          <span v-for="note in sec">
-            <span v-if="note.status === 'SUCCESS'">{{note.finger}}</span>
+        <template v-if="playingSecNo > secIdx">
+          <span class="note" v-for="note in sec">
+            <span v-bind:class="{'succ': note.status === 'SUCCESS', 'fail': note.status === 'MISSED'}">
+              {{note.finger}}
+            </span>
+          </span>
+        </template>
+        <template v-else-if="playingSecNo == secIdx">
+          <span class="note" v-for="note in sec">
+            <span class="succ" v-if="note.status === 'SUCCESS'">{{note.finger}}</span>
             <span v-if="note.status === 'NOT_HIT'">.</span>
           </span>
-        </span>
-        <span v-else-if="secIdx > playingSecNo && secIdx <= playingSecNo + coveredSecNum">
-          <span v-for="note in sec">
+        </template>
+        <template v-else-if="secIdx > playingSecNo && secIdx <= playingSecNo + coveredSecNum">
+          <span class="note" v-for="note in sec">
             x
           </span>
-        </span>
-        <span v-else>
-          <span v-for="note in sec">
+        </template>
+        <template v-else>
+          <span class="note" v-for="note in sec">
             {{note.finger}}
           </span>
-        </span>
+        </template>
         |
       </span>
     </div>
@@ -50,6 +60,7 @@ export default {
   },
   data: function() {
     return {
+      spm: 60,           // 每分钟多少小节
       sections: [],      // “乐谱”
       playingSecNo: -1,  // 当前在演奏第几个小节
       state: st.BEFORE_START, // 当前状态
@@ -99,6 +110,7 @@ export default {
       this.posInPlayingSec = 0
       this.state = st.RUNNING
       // https://www.npmjs.com/package/vue-timers
+      this.timers.running.time = 1000 / (this.spm / 60)
       this.$timer.start('running')
     },
     onPress(key) {
@@ -124,6 +136,13 @@ export default {
         this.$timer.stop('running')
         this.state = st.ENDING
       } else {
+        // 没有命中的status设为“MISSED”
+        if(this.playingSecNo >= 0) {
+          let playingSec = this.sections[this.playingSecNo]
+          for(let i=this.posInPlayingSec; i<playingSec.length; i++) {
+            playingSec[i].status = 'MISSED'
+          }
+        }
         this.playingSecNo++
         this.posInPlayingSec = 0
       }
@@ -146,3 +165,15 @@ export default {
   }
 }
 </script>
+<style>
+  .note {
+    display: inline-block;
+    width: 1em;
+  }
+  .succ {
+    color: green;
+  }
+  .fail{
+    color: red;
+  }
+</style>
