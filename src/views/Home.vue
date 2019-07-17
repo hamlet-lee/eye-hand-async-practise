@@ -1,12 +1,15 @@
 <template>
   <div class="home">
+    <button v-if="isDebug" @click="onPause">pause</button>
+    <button v-if="isDebug" @click="onResume">resume</button>
     <div v-if="state === BEFORE_START">
       每分钟<input v-model="spm"></input>小节
       <button @click="onStart">开始</button>
     </div>
     <div v-if="isRunning">
-      <span v-for="(sec,secIdx) in sections">
+      <span class="section" v-for="(sec,secIdx) in sections">
         <template v-if="playingSecNo > secIdx">
+          <span class="no-hint"></span>
           <span class="note" v-for="note in sec">
             <span v-bind:class="{'succ': note.status === 'SUCCESS', 'fail': note.status === 'MISSED'}">
               {{note.finger}}
@@ -14,22 +17,26 @@
           </span>
         </template>
         <template v-else-if="playingSecNo == secIdx">
-          <span class="note" v-for="note in sec">
+          <span class="hint">手</span>
+          <span class="note" v-for="(note,idx) in sec">
             <span class="succ" v-if="note.status === 'SUCCESS'">{{note.finger}}</span>
             <span v-if="note.status === 'NOT_HIT'">.</span>
           </span>
         </template>
         <template v-else-if="secIdx > playingSecNo && secIdx <= playingSecNo + coveredSecNum">
+          <span class="no-hint"></span>
           <span class="note" v-for="note in sec">
             x
           </span>
         </template>
         <template v-else-if="playingSecNo + coveredSecNum + 1 == secIdx">
-          <span class="note looking-ahead" v-for="note in sec">
+          <span class="hint">眼</span>
+          <span class="note looking-ahead" v-for="(note,idx) in sec">
             {{note.finger}}
           </span>
         </template>
         <template v-else>
+          <span class="no-hint"></span>
           <span class="note" v-for="note in sec">
             {{note.finger}}
           </span>
@@ -71,7 +78,8 @@ export default {
       state: st.BEFORE_START, // 当前状态
       coveredSecNum: 1,  // 要求提前看几个小节？
       posInPlayingSec: 0, // 当前在演奏第几个音符
-      correctNum: 0       // 本局演奏正确的音符数
+      correctNum: 0,       // 本局演奏正确的音符数
+      isDebug: false
     }
   },
   created: function(){
@@ -124,6 +132,12 @@ export default {
       this.state = st.RUNNING
       // https://www.npmjs.com/package/vue-timers
       this.timers.running.time = 1000 / (this.spm / 60)
+      this.$timer.start('running')
+    },
+    onPause(){
+      this.$timer.stop('running')
+    },
+    onResume(){
       this.$timer.start('running')
     },
     onPress(key) {
@@ -182,6 +196,8 @@ export default {
   .note {
     display: inline-block;
     width: 1em;
+    /* border-style: solid; */
+    /* border-color: red; */
   }
   .succ {
     color: green;
@@ -194,5 +210,21 @@ export default {
   }
   .looking-ahead {
     color: blue;
+  }
+  .hint {
+    /* width: 2em; */
+    height: 1em;
+    display: block;
+  }
+  .no-hint{
+    /* width: 2em; */
+    height: 1em;
+    display: block;
+  }
+  .section {
+    /* height: 3em; */
+    display: inline-block;
+    /* border-style: solid; */
+    /* border-color: red; */
   }
 </style>
