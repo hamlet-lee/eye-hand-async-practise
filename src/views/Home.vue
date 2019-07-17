@@ -78,10 +78,18 @@ export default {
       var _this = this;
       window.onkeydown = (e) => {
         this.onPress(e.key)
-    }
+      }
+      this.spm = parseInt(localStorage['spm'])
   },
   mounted () {
 
+  },
+  watch: {
+    spm (newVal, oldVal) {
+      let v = newVal
+      // console.log(`save spm = ${v}`)
+      localStorage['spm'] = v
+    }
   },
   computed: {
     score() {
