@@ -87,7 +87,10 @@ export default {
       window.onkeydown = (e) => {
         this.onPress(e.key)
       }
-      this.spm = parseInt(localStorage['spm'])
+      let spm = localStorage['spm']
+      if(!isNaN(spm)){
+        this.spm = parseInt(spm)
+      }
   },
   mounted () {
 
